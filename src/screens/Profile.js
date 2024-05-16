@@ -36,12 +36,30 @@ const Profile = () => {
   const [token, setToken] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  
+
+                
+  const user_info =  () =>{
+
+    fetch("http://192.168.1.5:8085/api/users/mycompte",  {
+      headers: {
+          Authorization: `Bearer  ${token} `
+      }
+  }  )
+      .then((response) => response.json())
+      .then((data) => {
+       console.log(data)
+      })
+      .catch((error) => console.error("Error fetching voyages: ", error));
+      
+  }              
   useEffect(() => {
     const getToken = async () => {
       try {
         const storedToken = await SecureStore.getItemAsync('secure_token');
         if (storedToken) {
           setToken(storedToken);
+          user_info();
         } else {
           navigation.reset({
             index: 0,

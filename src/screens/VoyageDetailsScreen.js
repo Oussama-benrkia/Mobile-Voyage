@@ -5,6 +5,17 @@ import { View, Text, Image, Button, StyleSheet } from 'react-native';
 const VoyageDetailsScreen = ({ navigation, route }) => {
   const { voyage } = route.params;
 
+  const handleReservation = () => {
+    // Hna fin handiro reservation process
+    //
+    //
+    //
+    //
+    //
+    //
+    
+  };
+
   return (
     <View style={styles.container}>
       <View style={styles.card}>
@@ -25,10 +36,17 @@ const VoyageDetailsScreen = ({ navigation, route }) => {
           </View>
         </View>
       </View>
-      <Button
-        title="Go back to Home"
-        onPress={() => navigation.navigate('Home')}
-      />
+      <View style={styles.buttonContainer}>
+        <Button
+          title="Make Reservation"
+          onPress={handleReservation}
+          color="#007bff" // You can customize the button color here
+        />
+        <Button
+          title="Go back to Home"
+          onPress={() => navigation.navigate('Home')}
+        />
+      </View>
     </View>
   );
 };
@@ -77,6 +95,11 @@ const styles = StyleSheet.create({
   date: {
     fontSize: 14,
     color: '#888',
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    width: '100%',
   },
 });
 
