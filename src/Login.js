@@ -1,51 +1,62 @@
-import React, { useState } from "react";
-import {
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import React, { useState, useEffect } from "react";
+import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { LinearGradient } from "expo-linear-gradient";
 import * as SecureStore from 'expo-secure-store';
+import { useNavigation } from '@react-navigation/native';
+import AntDesignIcon from "react-native-vector-icons/AntDesign";
 
-const Login = (props) => {
-    const setToken = (token) => {
-      return SecureStore.setItemAsync('secure_token', token);
-    };
-
+const Login = () => {
+  const navigation = useNavigation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
+  const setToken = async (token) => {
+    await SecureStore.setItemAsync('secure_token', token);
+  };
+
   const handleSubmit = () => {
-    fetch("http://192.168.137.16:8085/api/auth/authenticate", {
+    fetch("http://192.168.1.5:8085/api/auth/authenticate", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        email,
-        password
+        'email':email,
+        'password':password
       }),
     })
-    .then(response => response.json())
+    .then(response =>  response.json()
+    
+       )
     .then(data => {
+      console.log(data)
       if (data.token) {
         setToken(data.token);
-        props.navigation.navigate("MainContainer");
+        navigation.reset({
+          index: 0,
+          routes: [{ name: 'MainContainer' }],
+        });
       } else {
         console.log(data.message || "Failed Login");
       }
     })
     .catch(error => console.log(error));
-  }
+  };
 
+  const home=()=>{
+    navigation.reset({
+      index: 0,
+      routes: [{ name: 'MainContainer' }],
+    });
+  }
   return (
     <LinearGradient colors={["#7C4CEC", "#FFFFFF"]} style={styles.container}>
+      <TouchableOpacity style={styles.back} onPress={home}>
+      <AntDesignIcon name="home" color="white" size={45} />
+      </TouchableOpacity>
       <View style={styles.contentContainer}>
         <Text style={styles.title}>Login</Text>
         <View style={styles.formContainer}>
-        
           <TextInput
             style={styles.input}
             placeholder="Email / Username"
@@ -61,7 +72,7 @@ const Login = (props) => {
             onChangeText={setPassword}
           />
           <TouchableOpacity
-            onPress={() => props.navigation.navigate("ForgotPassword")}
+            onPress={() => navigation.navigate("ForgotPassword")}
             style={styles.forgotPasswordButton}
           >
             <Text style={styles.forgotPasswordText}>Forgot Password?</Text>
@@ -74,7 +85,7 @@ const Login = (props) => {
           <View style={styles.signUpContainer}>
             <Text style={styles.signUpText}>Don't have an account?</Text>
             <TouchableOpacity
-              onPress={() => props.navigation.navigate("Signup")}
+              onPress={() => navigation.navigate("Signup")}
             >
               <Text style={styles.signUpLink}>Sign Up</Text>
             </TouchableOpacity>
@@ -144,9 +155,7 @@ const styles = StyleSheet.create({
     color: "white",
     fontSize: 18,
     fontWeight: "bold",
-    
   },
-  
   signUpContainer: {
     flexDirection: "row",
     justifyContent: "center",
@@ -162,6 +171,14 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 5,
   },
+  back:{
+    position:'absolute',
+    left:10,
+    top:40,
+    backgroundColor:'rgba(0, 0, 25, 0.2)',
+    borderRadius:10,
+    padding:10
+  }
 });
 
 export default Login;

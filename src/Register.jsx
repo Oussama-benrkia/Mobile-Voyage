@@ -15,6 +15,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import * as SecureStore from 'expo-secure-store';
 
 export default function Signup(props) {
+  global.image_filename;
+  global.image_type;
 
   const savetoken = async (token )=>{
     await SecureStore.setItemAsync('secure_token',token);
@@ -28,26 +30,42 @@ export default function Signup(props) {
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [image, setImage] = useState(null);
+  const [errorMessage, setErrorMessage] = useState("");
 
-  const pickImage = async () => {
-    try {
-      let result = await ImagePicker.launchImageLibraryAsync({
-        mediaTypes: ImagePicker.MediaTypeOptions.All,
-        allowsEditing: true,
-        aspect: [4, 3],
-        quality: 1,
-      });
+  // const pickImage = async () => {
+  //   try {
+  //     let result = await ImagePicker.launchImageLibraryAsync({
+  //       mediaTypes: ImagePicker.MediaTypeOptions.All,
+  //       allowsEditing: true,
+  //       aspect: [4, 3],
+  //       quality: 1,
+  //     });
   
-      console.log("ImagePicker result:", result);
+  //     console.log("ImagePicker result:", result);
   
-      if (!result.canceled) {
-        setImage(result.assets[0].uri);
-        console.log("Image URI:", result.assets[0].uri);
-      }
-    } catch (error) {
-      console.error("Error picking image:", error);
-    }
-  };
+  //     if (!result.canceled) {
+  //       const selectedImage = result.assets[0];
+
+  //     // Convert image URI to Blob
+  //     const response = await fetch(selectedImage.uri);
+  //     const blob = await response.blob();
+
+  //     // Convert Blob to File
+  //     const file = new File([blob], selectedImage.fileName, { type: selectedImage.type });
+
+  //     setImage({
+  //       uri: selectedImage.uri,
+  //       file: file,
+  //       filename: selectedImage.fileName,
+  //       type: selectedImage.type,
+  //     });
+        
+        
+  //     }
+  //   } catch (error) {
+  //     console.error("Error picking image:", error);
+  //   }
+  // };
   function handleSubmit(e) {
     e.preventDefault();
   
@@ -56,23 +74,26 @@ export default function Signup(props) {
     formData.append('password', password);
     formData.append('firstname', firstName);
     formData.append('lastname', lastName);
+    
+    
      
-    fetch("http://24.20.0.232:8085/api/auth/register", {
+    fetch("http://192.168.1.5:8085/api/auth/register", {
       method: "POST",
       body: formData,
     })
       .then((response) => response.json())
       .then((data) => {
-        console.log(data);
-        console.log(data.token);
 
         if (data.token) {
-            savetoken(data.token);
-            console.table(gettoken());
-          //// Navigate to MainContainer
-          //props.navigation.navigate("MainContainer");
+          gettoken()
+          .then(token => {
+            console.log(token); // daba rah tiji token 
+          });
+          
+          props.navigation.navigate("MainContainer");
         } else {
           console.log(data.message);
+          setErrorMessage(data.message);
         }
       })
       .catch((error) => console.log(error));
@@ -86,10 +107,9 @@ export default function Signup(props) {
         keyboardVerticalOffset={Platform.OS === "ios" ? 40 : 0}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer}>
-          <Text style={styles.txtW}>Register</Text>
+          <Text style={styles.txtW} >Register</Text>
           <View style={styles.c3}>
-            <Text style={styles.txtV}>Create an Account</Text>
-            <Text style={styles.txtG}>Please fill in the details below</Text>
+            {errorMessage && <Text style={styles.errorMessage}>{errorMessage}</Text>}
             <TextInput
               style={styles.input}
               placeholder="Email"
@@ -116,10 +136,17 @@ export default function Signup(props) {
               value={lastName}
               onChangeText={setLastName}
             />
-            <TouchableOpacity style={styles.button} onPress={pickImage}>
+            {/* <TouchableOpacity style={styles.button} onPress={pickImage}>
               <Text style={styles.buttonText}>Pick Image</Text>
             </TouchableOpacity>
-            {image && <Image source={{ uri: image }} style={styles.image} />}
+            {image && (
+              <Image
+                source={{ uri: image.uri }}
+                style={styles.image}
+              />
+            )} */}
+
+
             <TouchableOpacity style={styles.button} onPress={handleSubmit}>
               <LinearGradient
                 colors={["#54B5F4", "#7C4CEC"]}
@@ -150,14 +177,17 @@ const styles = StyleSheet.create({
     flexGrow: 1,
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "#F3F4F6", // Change background color
   },
   image: {
     width: 200,
     height: 200,
+    marginBottom: 20, // Add margin bottom
+    borderRadius: 10, // Add border radius
   },
   container: {
     flex: 1,
-    backgroundColor: "white",
+    backgroundColor: "#F3F4F6", // Change background color
     alignItems: "center",
     justifyContent: "center",
   },
@@ -170,55 +200,55 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     marginTop: 20,
     marginBottom: 30,
-    color: "white",
+    color: "black", // Change text color
   },
   txtV: {
     fontSize: 40,
     color: "#7C4CEC",
     fontWeight: "bold",
+    marginBottom: 10, // Adjust margin bottom
   },
   txtG: {
-    color: "#253660",
-    fontSize: 19,
-    fontWeight: "bold",
+    color: "#4B5563", // Change text color
+    fontSize: 18, // Adjust font size
     marginBottom: 20,
   },
   c3: {
-    backgroundColor: "rgba(255,255,255,0.4)",
-    width: "100%",
-    borderTopRightRadius: 110,
-    paddingTop: 100,
+    backgroundColor: "white",
+    width: "90%", // Adjust width
+    borderRadius: 20, // Add border radius
+    padding: 20, // Add padding
     alignItems: "center",
   },
   input: {
-    width: "80%",
+    width: "100%", // Adjust width
     height: 50,
-    borderColor: "rgba(255,255,255,0.3)",
+    borderColor: "#D1D5DB", // Change border color
     borderWidth: 1,
-    borderRadius: 50,
-    color: "grey",
-    fontSize: 20,
+    borderRadius: 10, // Add border radius
+    color: "#4B5563", // Change text color
+    fontSize: 18, // Adjust font size
     paddingHorizontal: 10,
-    backgroundColor: "rgba(255,255,255,0.3)",
     marginBottom: 20,
+    backgroundColor: "#EDF2F7", // Change background color
   },
   button: {
+    width: "100%", // Adjust width
     paddingVertical: 12,
-    paddingHorizontal: 30,
-    borderRadius: 25,
+    borderRadius: 10, // Add border radius
     marginBottom: 20,
     height: 50,
-    width: "95%",
+    backgroundColor: "#7C4CEC", // Change background color
   },
   buttonGradient: {
+    width: "100%", // Adjust width
     paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderRadius: 25,
+    borderRadius: 10, // Add border radius
     marginBottom: 20,
     fontWeight: "bold",
     fontSize: 20,
     height: 50,
-    width: "100%",
+    backgroundColor: "#7C4CEC", // Change background color
   },
   buttonText: {
     color: "white",
@@ -229,6 +259,7 @@ const styles = StyleSheet.create({
   vNoAcc: {
     flexDirection: "row",
     justifyContent: "center",
+    marginTop: 20, // Adjust margin top
   },
   txtGoSignup: {
     color: "#7C4CEC",
@@ -236,8 +267,16 @@ const styles = StyleSheet.create({
     fontSize: 16,
   },
   txtNoAcc: {
-    color: "grey",
+    color: "#4B5563", // Change text color
     fontWeight: "bold",
     fontSize: 16,
   },
+  errorMessage: {
+    color: 'red',
+    marginBottom: 10,
+    marginTop: 10,
+    fontWeight: "bold",
+    fontSize: 20,
+  }
 });
+
